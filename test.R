@@ -1,24 +1,36 @@
-# Fit a linear model and plot it
-plotlm <- function(x, y, col = "blue", plotit=TRUE,...){
-  if (FALSE) {
-    x = rnorm(100)
-    y = rnorm(100)
-    col = "blue"
-    plotlm(x, y, main = "Nice title", pch = 10,
-           col = "tomato",
-           cex = 1.5)
-  }
-  mod <- lm(y ~ x, data = data.frame(x,y))
-  #browser()
-  tmp=sign(mod$coefficients[2])
-  tmp=substr(tmp,1,1)
-  modstr <- paste("y =", 
-                 signif(abs(mod$coefficients[1]), 3),tmp,signif(mod$coefficients[1], 3),"x")
-  if (plotit) {
-    plot(x, y, col = col, ...)
-    mtext(modstr, side = 3, line = 0)
-    abline(mod)
-  }
-  return(mod)
-}
-plotlm(x,y)
+library(dplyr)
+library(ggplot2)
+
+source("myplot_Qianru.R")
+
+# Dataset for the source figure
+ad <- read.csv("AD_cluster_3.csv")
+rownames(ad) <- ad[, 1]
+ad <- ad[, -1]
+
+# Dataset in ts format
+EuStockMarkets
+
+# Dataset with missing values
+ad_na <- ad
+ad_na$CHOTF[ad$CHOTF == 0] <- NA
+
+# Dataset of 1 time series (should give an error)
+ts01 <- rnorm(100)
+ts02 <- ts(ts01)
+ts03 <- ad[, 1, drop = FALSE]
+
+# Check the function
+## 60 points: Should work in each case
+myplot(ad)
+myplot(EuStockMarkets)
+myplot(ad_na)
+
+## 25 points: Consider changing the color and add/remove the line for the average
+## (the arguments plotmean and color can be named differently by the student)
+myplot(ad, plotmean = TRUE, color = "red")
+
+## 15 points: Should not work (give an informative error in each case)
+myplot(ts01)
+myplot(ts02)
+myplot(ts03)
