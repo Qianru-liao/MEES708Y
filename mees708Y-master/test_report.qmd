@@ -1,0 +1,125 @@
+---
+title: "Untitled"
+author: "Slava L"
+date: today
+format: 
+    html:
+        code-fold: true
+        theme: cosmo
+number-sections: true
+bibliography: 
+    - ref.bib
+    - refPackages.bib
+csl: ecology.csl
+knitr:
+  opts_chunk:
+    message: false
+    warning: false
+---
+
+```{r}
+library(ggplot2)
+library(plotly)
+```
+
+# Quarto 
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>. See @tribe1999 sdf sdfsdfs [@tribe1999].
+
+```{r}
+p <- ggplot(iris, aes(x = Species, y = Sepal.Length)) +
+  geom_boxplot() +
+  geom_jitter(size = 0.6, alpha = 0.9, width = 0.2) +
+  theme_light()
+ggplotly(p, tooltip = c("y"))
+
+```
+
+```{r}
+#| column: screen
+
+# https://rstudio.github.io/leaflet/
+library(leaflet)
+leaflet() %>%
+  addTiles() %>%  # Add default OpenStreetMap map tiles
+  addMarkers(lng=174.768, lat=-36.852, popup="The birthplace of R")
+```
+
+## Running Code
+
+```{r}
+#| fig-cap: "GGPlot example."
+
+df <- data.frame(
+  gp = factor(rep(letters[1:3], each = 10)),
+  y = rnorm(30)
+)
+ds <- do.call(rbind, lapply(split(df, df$gp), function(d) {
+  data.frame(mean = mean(d$y), sd = sd(d$y), gp = d$gp)
+}))
+
+# The summary data frame ds is used to plot larger red points on top
+# of the raw data. Note that we don't need to supply `data` or `mapping`
+# in each layer because the defaults from ggplot() are used.
+p <- ggplot(df, aes(gp, y)) +
+  geom_point() +
+  geom_point(data = ds, aes(y = mean), colour = 'red', size = 3)
+ggplotly(p)
+```
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+### My subsection {#sec-important}
+
+```{r}
+1 + 1
+```
+
+
+You can add options to executable code like this, see @fig-dot in @sec-important.
+
+```{r}
+#| echo: false
+#| fig-cap: "My first figure."
+#| label: fig-dot
+
+plot(2 * 2)
+```
+
+What a nice model @eq-reg! Estimated using @R-base, plotted using `ggplot2` [@R-ggplot2].
+
+$$
+y = a + bx,
+$${#eq-reg}
+where $x$ is the predictor.
+
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+
+# CART
+
+```{r}
+library(rpart)
+library(rpart.plot)
+# classification
+m0 = rpart(Species ~ ., data = iris)
+rpart.plot(m0)
+# regression
+m1 = rpart(Petal.Width ~ ., 
+           control = rpart.control(maxdepth = 2),
+           data = iris)
+rpart.plot(m1)
+```
+
+
+```{r}
+#| include: false
+
+# automatically create a bib database for R packages
+knitr::write_bib(c(
+    .packages(), 'base', # packages definitely used in the code above
+    'knitr' # packages used to compile the file
+), 'refPackages.bib')
+```
+

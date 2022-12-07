@@ -1,0 +1,52 @@
+---
+output: html_document
+editor_options: 
+    chunk_output_type: console
+---
+
+# Software {.unnumbered}
+
+Examples were calculated in `r R.Version()$version.string` with an effort to use the most recent versions of R packages.
+
+The R packages used in this book include (in alphabetic order):
+
+```{r}
+#| echo: false
+
+packages2cite <- sort(c(
+    'car'
+    ,'dplyr'
+    ,'Ecdat'
+    ,'fable'
+    ,'feasts'
+    ,'fma'
+    ,'forecast' 
+    ,'funtimes'
+    # ,'ggfortify'
+    ,'ggplot2'
+    ,'knitr'
+    ,'lawstat'
+    ,'lmtest'
+    ,'patchwork'
+    ,'plotly'
+    ,'pracma'
+    ,'randtests'))
+
+# Create a bib database for R packages
+knitr::write_bib(c(.packages()
+    ,'base'
+    ,packages2cite
+), 'refpackages.bib')
+
+# Form a list with citations
+tmp <- paste0("* `", packages2cite, "` [@R-", packages2cite, "]")
+```
+
+`r paste(tmp, collapse = "\n")`
+
+<!-- # Reg1 -->
+<!-- library(tseries) -->
+<!-- library(dynlm) -->
+<!-- library(urca) -->
+<!-- library(dplyr) -->
+<!-- library(ecm) -->

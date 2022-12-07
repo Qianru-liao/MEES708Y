@@ -1,0 +1,158 @@
+---
+title: "HW2_Qianru"
+format: html
+editor: visual
+---
+
+## HW2
+
+Replicate results of analysis from Lyubchich et al. (2020) "A data-driven approach to detecting change points in linear regression models" in a Quatro document (newer version of Markdown).
+
+## Q1
+
+Estimates in equations (8) and (9); retype the equations in this format in your report
+
+equations (8):
+
+$$
+\hat{y}_{1t}=-\underset{(0.405)}{\mathrm{0.980}}+\underset{(1.069·10^{-6})}{\mathrm{6.903·10^{−6}}}JanAprTNLoad_t,
+$$ equations (9):
+
+$$
+\hat{y}_{2t}=-\underset{(0.426)}{\mathrm{0.217}}+\underset{(1.360·10^{-6})}{\mathrm{5.596·10^{−6}}}JanMayTNLoad_t,
+$$
+
+## Q2  
+Figure 3 (can provide a different look but preserve the superscripts in axes labels and labels for the lines in A and D; format as subfigures and not separate figures)
+
+Early summer,respective residuals and sample autocorrelation functions (ACFs) of the residuals
+
+```{r}
+library(ggplot2)
+data= read.csv('anoxia_jmt3_SL.csv')
+data$fitted_earlysummer=data$JanAprTNLoad*6.903*(10^(-6))-0.980
+data$fitted_latesummer=data$JanMayTNLoad*5.596*(10^(-6))-0.217
+
+data$fitted_earlysummer_residuals=data$EarlySummerAnoxicVol-data$fitted_earlysummer
+data$fitted_latesummer_residuals=data$LateSummerAnoxicVol-data$fitted_latesummer
+
+p1=ggplot(data,aes(x=Year))+
+  geom_point(aes(y=EarlySummerAnoxicVol),color="black")+
+  geom_line(aes(y=EarlySummerAnoxicVol),color="black")+
+  geom_line(aes(y=fitted_earlysummer),color="blue")+
+  xlab("Year") +
+  ylab(bquote('Early summer anoxic volume' (km^3))) +
+  #scale_color_manual(name = "Line",values = c('black', 'blue', 'black'))+
+  theme_classic()+
+  annotate(geom = "text", x = 1986, y = 2.2, label = "Fitted",color="blue")+
+  annotate(geom = "text", x = 1986, y = 0.1, label = "Observed",color="black")
+  
+p2=ggplot(data,aes(x=Year))+
+  geom_point(aes(y=fitted_earlysummer_residuals),color="black")+
+  geom_line(aes(y=fitted_earlysummer_residuals),color="black")+
+  xlab("Year") +
+  ylab(bquote('Residuals' (km^3))) +
+  geom_hline(yintercept=0,linetype=2)+
+  theme_classic()
+
+p3=forecast::ggAcf(data$fitted_earlysummer_residuals,15)+  
+  ylim(-0.4,0.4)+
+  ylab("ACF of residuals")+
+  ggtitle('ACF')+
+  theme_classic()
+
+library(ggplot2)
+library(cowplot)
+plot_grid(p1, plot_grid(p2, p3), ncol = 1)
+```
+
+Late summer,respective residuals and sample autocorrelation functions (ACFs) of the residuals
+
+```{r}
+p4=ggplot(data,aes(x=Year))+
+  geom_point(aes(y=LateSummerAnoxicVol),color="black")+
+  geom_line(aes(y=LateSummerAnoxicVol),color="black")+
+  geom_line(aes(y=fitted_latesummer),color="blue")+
+  xlab("Year") +
+  ylab(bquote('Late summer anoxic volume' (km^3))) +
+  #scale_color_manual(name = "Line",values = c('black', 'blue', 'black'))+
+  theme_classic()+
+  annotate(geom = "text", x = 1988, y = 1.1, label = "Fitted",color="blue")+
+  annotate(geom = "text", x = 1986, y = 3, label = "Observed",color="black")
+  
+p5=ggplot(data,aes(x=Year))+
+  geom_point(aes(y=fitted_latesummer_residuals),color="black")+
+  geom_line(aes(y=fitted_latesummer_residuals),color="black")+
+  xlab("Year") +
+  ylab(bquote('Residuals' (km^3))) +
+  geom_hline(yintercept=0,linetype=2)+
+  theme_classic()
+
+p6=forecast::ggAcf(data$fitted_latesummer_residuals,15)+  
+  ylim(-0.4,0.4)+
+  ylab("ACF of residuals")+
+  ggtitle('ACF')+
+  theme_classic()
+
+library(ggplot2)
+library(cowplot)
+plot_grid(p4, plot_grid(p5, p6), ncol = 1)
+
+
+```
+
+
+## Q3
+Figure 4 (this figure can be presented as separate figures)
+Classification and regression trees applied to residuals of (a) model (8) for anoxic volumes in early summer, and (b) model (9) for anoxic volumes in late summer. For each node, the average value of the residuals is reported along with the node size expressed as percentage of the total sample size T = 33
+
+```{r}
+#Classification and regression trees applied to residuals of model (8) for anoxic volumes in early summer
+library(rpart)
+library(rpart.plot)
+library(dplyr)
+#classification
+data_early=select(data,Year,fitted_earlysummer_residuals)
+# regression
+m1 = rpart(fitted_earlysummer_residuals ~ ., 
+           control = rpart.control(maxdepth = 2,minbucket = 4),
+           data = data_early)
+rpart.plot(m1)
+```
+
+
+```{r}
+#Classification and regression trees applied to residuals of the model (9) for anoxic volumes in late summer
+data_late=select(data,Year,fitted_latesummer_residuals)
+# regression
+m2 = rpart(fitted_latesummer_residuals ~ ., 
+           control = rpart.control(maxdepth = 2,minbucket = 4),
+           data = data_late)
+rpart.plot(m2)
+```
+
+##Q4
+Bootstrapped p-values (closely) corresponding to the two lines for CART in Table 2
+
+```{r}
+#according to the method part in that paper, I will use mcusum_test to calculate p value
+#1988-1985+1=4
+#2013-1985+1=29
+set.seed(3333)
+library(funtimes)
+#remove NA value
+fitted_earlysummer_residuals_new=head(data$fitted_earlysummer_residuals, -1)
+mcusum_test(e=fitted_earlysummer_residuals_new,k=c(4,29),m=3,B=10000,ksm = TRUE)
+```
+
+
+```{r}
+#according to the method part in that paper, I will use mcusum_test to calculate p value
+#2001-1985+1=17
+#2009-1985+1=25
+set.seed(3333)
+library(funtimes)
+#remove NA value
+fitted_latesummer_residuals_new=head(data$fitted_latesummer_residuals, -1)
+mcusum_test(e=fitted_latesummer_residuals_new,k=c(17,25),m=3,shortboot=TRUE, B=10000)
+```
