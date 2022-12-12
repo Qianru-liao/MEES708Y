@@ -27,7 +27,7 @@ Figure 3 (can provide a different look but preserve the superscripts in axes lab
 
 Early summer,respective residuals and sample autocorrelation functions (ACFs) of the residuals
 
-```{r}
+```{r, warning=FALSE}
 library(ggplot2)
 data= read.csv('anoxia_jmt3_SL.csv')
 data$fitted_earlysummer=data$JanAprTNLoad*6.903*(10^(-6))-0.980
@@ -68,7 +68,7 @@ plot_grid(p1, plot_grid(p2, p3), ncol = 1)
 
 Late summer,respective residuals and sample autocorrelation functions (ACFs) of the residuals
 
-```{r}
+```{r, warning=FALSE}
 p4=ggplot(data,aes(x=Year))+
   geom_point(aes(y=LateSummerAnoxicVol),color="black")+
   geom_line(aes(y=LateSummerAnoxicVol),color="black")+
@@ -106,7 +106,7 @@ plot_grid(p4, plot_grid(p5, p6), ncol = 1)
 Figure 4 (this figure can be presented as separate figures)
 Classification and regression trees applied to residuals of (a) model (8) for anoxic volumes in early summer, and (b) model (9) for anoxic volumes in late summer. For each node, the average value of the residuals is reported along with the node size expressed as percentage of the total sample size T = 33
 
-```{r}
+```{r, warning=FALSE}
 #Classification and regression trees applied to residuals of model (8) for anoxic volumes in early summer
 library(rpart)
 library(rpart.plot)
@@ -121,7 +121,7 @@ rpart.plot(m1)
 ```
 
 
-```{r}
+```{r, warning=FALSE}
 #Classification and regression trees applied to residuals of the model (9) for anoxic volumes in late summer
 data_late=select(data,Year,fitted_latesummer_residuals)
 # regression
@@ -131,10 +131,10 @@ m2 = rpart(fitted_latesummer_residuals ~ .,
 rpart.plot(m2)
 ```
 
-##Q4
+## Q4 
 Bootstrapped p-values (closely) corresponding to the two lines for CART in Table 2
 
-```{r}
+```{r, warning=FALSE}
 #according to the method part in that paper, I will use mcusum_test to calculate p value
 #1988-1985+1=4
 #2013-1985+1=29
@@ -146,7 +146,7 @@ mcusum_test(e=fitted_earlysummer_residuals_new,k=c(4,29),m=3,B=10000,ksm = TRUE)
 ```
 
 
-```{r}
+```{r, warning=FALSE}
 #according to the method part in that paper, I will use mcusum_test to calculate p value
 #2001-1985+1=17
 #2009-1985+1=25
